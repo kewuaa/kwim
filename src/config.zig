@@ -19,7 +19,10 @@ xkb_keyboard_rules: ?[]const XkbKeyboardRule = null,
 
 
 pub fn load(allocator: mem.Allocator, path: []const u8) !Self {
-    const file = try fs.cwd().openFile(path, .{ .mode = .read_only });
+    const file = fs.cwd().openFile(path, .{ .mode = .read_only }) catch |err| {
+        log.warn("Failed to open `{s}`: {}", .{ path, err });
+        return .{};
+    };
     defer file.close();
 
     const stat = try file.stat();
