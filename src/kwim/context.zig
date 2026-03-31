@@ -1,5 +1,6 @@
 const Self = @This();
 
+const build_options = @import("build_options");
 const std = @import("std");
 const fs = std.fs;
 const mem = std.mem;
@@ -101,22 +102,34 @@ pub inline fn get() *Self {
 pub fn apply_config(self: *Self, config: *const Config) void {
     log.debug("apply config", .{});
 
-    if (config.input_device_rules) |input_device_rules| {
+    var input_device_rules = config.input_device_rules;
+    var libinput_device_rules = config.libinput_device_rules;
+    var xkb_keyboard_rules = config.xkb_keyboard_rules;
+
+    if (comptime build_options.has_default_config) {
+        const default_config: Config = @import("default_config");
+
+        input_device_rules = input_device_rules orelse default_config.input_device_rules;
+        libinput_device_rules = libinput_device_rules orelse default_config.libinput_device_rules;
+        xkb_keyboard_rules = xkb_keyboard_rules orelse default_config.xkb_keyboard_rules;
+    }
+
+    if (input_device_rules) |rules| {
         var it = self.input_devices.safeIterator(.forward);
         while (it.next()) |input_device| {
-            input_device.apply_rules(input_device_rules);
+            input_device.apply_rules(rules);
         }
     }
-    if (config.libinput_device_rules) |libinput_device_rules| {
+    if (libinput_device_rules) |rules| {
         var it = self.libinput_devices.safeIterator(.forward);
         while (it.next()) |libinput_device| {
-            libinput_device.apply_rules(libinput_device_rules);
+            libinput_device.apply_rules(rules);
         }
     }
-    if (config.xkb_keyboard_rules) |xkb_keyboard_rules| {
+    if (xkb_keyboard_rules) |rules| {
         var it = self.xkb_keyboards.safeIterator(.forward);
         while (it.next()) |xkb_keyboard| {
-            xkb_keyboard.apply_rules(xkb_keyboard_rules);
+            xkb_keyboard.apply_rules(rules);
         }
     }
 }

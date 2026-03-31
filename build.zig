@@ -64,6 +64,35 @@ pub fn build(b: *std.Build) void {
     config_mod.addImport("kwim", kwim_mod);
     kwim_mod.addImport("config", config_mod);
 
+    const kwm_config = b.option([]const u8, "kwm_config", "kwm config");
+    if (kwm_config) |path| {
+        const default_config_mod = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .root_source_file = blk: {
+                const load_default_config = b.addExecutable(.{
+                    .name = "load_default_config",
+                    .root_module = b.createModule(.{
+                        .target = target,
+                        .optimize = .ReleaseSafe,
+                        .root_source_file = b.path("src/load_default_config.zig"),
+                        .link_libc = true,
+                    }),
+                });
+                const load_default_config_run = b.addRunArtifact(load_default_config);
+                load_default_config_run.addArg("-i");
+                load_default_config_run.addArg(path);
+                load_default_config_run.addArg("-o");
+                break :blk load_default_config_run.addOutputFileArg("default_config.zon");
+            }
+        });
+        kwim_mod.addImport("default_config", default_config_mod);
+    }
+
+    const kwim_options = b.addOptions();
+    kwim_options.addOption(bool, "has_default_config", kwm_config != null);
+    kwim_mod.addOptions("build_options", kwim_options);
+
     const full_version = blk: {
         if (b.option([]const u8, "version-string", "Override `kwm -version` output.")) |version_override| {
             break :blk version_override;
