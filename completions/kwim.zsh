@@ -16,6 +16,8 @@ _kwim() {
     )
 
     common_options=(
+        '--help'
+        '-h'
         '--name'
         '--regex'
         '--match-null'
@@ -108,9 +110,6 @@ _kwim() {
         local device_type=$words[3]
 
         case $subcommand in
-            list)
-                compadd -- -h --help
-                ;;
             apply)
                 case $device_type in
                     input-device)
