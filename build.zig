@@ -93,6 +93,26 @@ pub fn build(b: *std.Build) void {
     kwim_options.addOption(bool, "has_default_config", kwm_config != null);
     kwim_mod.addOptions("build_options", kwim_options);
 
+    const bash_completion = b.option(
+        bool,
+        "bash-completion",
+        "Set to true to install bash completion for kwim. Defaults to true.",
+    ) orelse true;
+
+    if (bash_completion) {
+        b.installFile("completions/kwim.bash", "share/bash-completion/completions/kwim");
+    }
+
+    const zsh_completion = b.option(
+        bool,
+        "zsh-completion",
+        "Set to true to install zsh completion for kwim. Defaults to true.",
+    ) orelse true;
+
+    if (zsh_completion) {
+        b.installFile("completions/kwim.zsh", "share/zsh/site-functions/_kwim");
+    }
+
     const full_version = blk: {
         if (b.option([]const u8, "version-string", "Override `kwm -version` output.")) |version_override| {
             break :blk version_override;
