@@ -139,9 +139,6 @@ _kwim() {
                         ;;
                 esac
                 ;;
-            list)
-                COMPREPLY=( $(compgen -W "-h --help" -- "$cur") )
-                ;;
         esac
     else
         COMPREPLY=()
