@@ -1,0 +1,17 @@
+name: Feature Request
+description: Request a new feature
+title: '[Feature] '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Note: Before opening a new issue, please search for existing issues and test with a build of kwim from the latest commit.
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Feature description
+      description: A clear and concise description of what you want to happen, and why should it be implemented.
+    validations:
+      required: true

@@ -1,0 +1,64 @@
+name: Bug Report
+description: File a bug/issue
+title: '[Bug] '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Note: Before opening a new issue, please search for existing issues and reproduce the bug with a build of kwim from the latest commit.
+
+        Note: A river crash is always a river bug. No Wayland client (including the window manager) should be able to make river crash.
+
+  - type: input
+    id: river-version
+    attributes:
+      label: River Version
+      description: The output of `river -version`.
+    validations:
+      required: true
+
+  - type: input
+    id: kwim-version
+    attributes:
+      label: KWIM version
+      description: The output of `kwim -version`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of Bug and Steps to Reproduce
+      description: Exactly what steps can someone else take to see the bug themselves? What happens?
+      placeholder: |
+        1. With this kwim configuration...
+        2. Start river with window manager this way...
+        3. Do this...
+        4. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs, Stacktraces, etc.
+      description: |
+        Please provide as many details as possible, we must be able to understand the bug in order to fix it.
+
+        Use a debug build of river and kwim if possible to get a better quality stacktrace
+
+        ```
+        zig build -Doptimize=Debug <other desired options>
+        ```
+
+        Redirect logs to a file:
+
+        ```
+        river 1>river.log 2>&1
+        ```
+
+        Reproduce your problem and exit river.
+      render: shell
+    validations:
+      required: false
