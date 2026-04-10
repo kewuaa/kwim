@@ -326,6 +326,18 @@ fn parse_libinput_device(allocator: mem.Allocator, it: *process.ArgIterator) !Co
     var rule = Config.LibinputDeviceRule{};
     errdefer if (rule.name) |name| allocator.free(name.str);
 
+    if (res.args.name) |name| {
+        rule.name = .{ .str = try allocator.dupe(u8, name) };
+    }
+    if (rule.name) |*name| {
+        if (res.args.@"regex" != 0) {
+            name.regex = true;
+        }
+        if (res.args.@"match-null" != 0) {
+            name.match_null = true;
+        }
+    }
+
     if (res.args.@"send-event-modes") |send_events_modes| {
         rule.send_events_modes = send_events_modes;
     }
