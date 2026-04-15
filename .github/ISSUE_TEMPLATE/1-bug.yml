@@ -22,7 +22,7 @@ body:
     id: kwim-version
     attributes:
       label: KWIM version
-      description: The output of `kwim -version`.
+      description: The output of `kwim -v`.
     validations:
       required: true
 
