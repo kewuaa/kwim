@@ -30,9 +30,13 @@ pub const DeviceType = enum {
     @"libinput-device",
     @"xkb-keyboard",
 };
+pub const ListOption = struct {
+    device_type: DeviceType,
+    pattern: ?Config.Pattern = null,
+};
 pub const RunOption = union(enum) {
     apply: Config,
-    list: DeviceType,
+    list: ListOption,
 };
 
 
@@ -46,10 +50,10 @@ pub fn run(wl_display: *wl.Display, option: RunOption) !void {
             log.debug("apply config: {any}", .{ config });
             context.apply_config(&config);
         },
-        .list => |device_type| switch (device_type) {
-            .@"input-device" => try context.list_input_devices(),
-            .@"libinput-device" => try context.list_libinput_devices(),
-            .@"xkb-keyboard" => try context.list_xkb_keyboards(),
+        .list => |list_option| switch (list_option.device_type) {
+            .@"input-device" => try context.list_input_devices(list_option.pattern),
+            .@"libinput-device" => try context.list_libinput_devices(list_option.pattern),
+            .@"xkb-keyboard" => try context.list_xkb_keyboards(list_option.pattern),
         }
     }
 

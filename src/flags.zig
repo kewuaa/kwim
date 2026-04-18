@@ -119,7 +119,7 @@ pub fn parse(allocator: mem.Allocator) !?kwim.RunOption {
 }
 
 
-fn parse_list(allocator: mem.Allocator, it: *process.ArgIterator) !kwim.DeviceType {
+fn parse_list(allocator: mem.Allocator, it: *process.ArgIterator) !kwim.ListOption {
     const params = comptime clap.parseParamsComptime(
         \\ -h, --help       Print this help message and exit
         \\ <DEVICE_TYPE>    Device type (e.g. input-device, libinput-device, xkb-keyboard)
@@ -148,7 +148,56 @@ fn parse_list(allocator: mem.Allocator, it: *process.ArgIterator) !kwim.DeviceTy
         posix.exit(0);
     }
 
-    return res.positionals[0] orelse error.MissingDeviceType;
+    return .{
+        .device_type = res.positionals[0] orelse return error.MissingDeviceType,
+        .pattern = try parse_list_pattern(allocator, it),
+    };
+}
+
+
+fn parse_list_pattern(allocator: mem.Allocator, it: *process.ArgIterator) !?Config.Pattern {
+    const params = subcommand_params;
+
+    var diag = clap.Diagnostic{};
+    var res = clap.parseEx(
+        clap.Help,
+        &params,
+        parsers,
+        it,
+        .{
+            .allocator = allocator,
+            .diagnostic = &diag,
+            .terminating_positional = 0,
+        },
+    ) catch |err| {
+        try diag.reportToFile(.stderr(), err);
+        return err;
+    };
+    defer res.deinit();
+
+    if (res.args.help != 0) {
+        try clap.helpToFile(.stdout(), clap.Help, &params, .{});
+        posix.exit(0);
+    }
+
+    var pattern: ?Config.Pattern = null;
+    errdefer if (pattern) |p| allocator.free(p.str);
+
+    if (res.args.name) |name| {
+        pattern = .{
+            .str = try allocator.dupe(u8, name),
+        };
+    }
+    if (pattern) |*p| {
+        if (res.args.@"regex" != 0) {
+            p.regex = true;
+        }
+        if (res.args.@"match-null" != 0) {
+            p.match_null = true;
+        }
+    }
+
+    return pattern;
 }
 
 

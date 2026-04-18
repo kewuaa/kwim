@@ -135,7 +135,7 @@ pub fn apply_config(self: *Self, config: *const Config) void {
 }
 
 
-pub fn list_input_devices(self: *Self) !void {
+pub fn list_input_devices(self: *Self, pattern: ?Config.Pattern) !void {
     var stdout_buffer: [1024]u8 = undefined;
     var stdout_writer = fs.File.stdout().writer(&stdout_buffer);
     const stdout = &stdout_writer.interface;
@@ -143,6 +143,10 @@ pub fn list_input_devices(self: *Self) !void {
     {
         var it = self.input_devices.safeIterator(.forward);
         while (it.next()) |input_device| {
+            if (pattern) |p| {
+                if (!p.is_match(input_device.name)) continue;
+            }
+
             try stdout.print(
                 "name: {s}, type: {s}\n",
                 .{ input_device.name orelse "unknown", @tagName(input_device.type) },
@@ -154,7 +158,7 @@ pub fn list_input_devices(self: *Self) !void {
 }
 
 
-pub fn list_libinput_devices(self: *Self) !void {
+pub fn list_libinput_devices(self: *Self, pattern: ?Config.Pattern) !void {
     var stdout_buffer: [1024]u8 = undefined;
     var stdout_writer = fs.File.stdout().writer(&stdout_buffer);
     const stdout = &stdout_writer.interface;
@@ -162,13 +166,15 @@ pub fn list_libinput_devices(self: *Self) !void {
     {
         var it = self.libinput_devices.safeIterator(.forward);
         while (it.next()) |libinput_device| {
+            const device_name = if (libinput_device.input_device) |input_device| input_device.name else null;
+            if (pattern) |p| {
+                if (!p.is_match(device_name)) continue;
+            }
+
             try stdout.writeAll("==============================================\n");
             try stdout.print(
                 "name: {s}\n",
-                .{
-                    (if (libinput_device.input_device) |input_device| input_device.name else null)
-                    orelse "unknown",
-                }
+                .{ device_name orelse "unknown" }
             );
 
             try stdout.print(
@@ -295,7 +301,7 @@ pub fn list_libinput_devices(self: *Self) !void {
 }
 
 
-pub fn list_xkb_keyboards(self: *Self) !void {
+pub fn list_xkb_keyboards(self: *Self, pattern: ?Config.Pattern) !void {
     var stdout_buffer: [1024]u8 = undefined;
     var stdout_writer = fs.File.stdout().writer(&stdout_buffer);
     const stdout = &stdout_writer.interface;
@@ -303,13 +309,15 @@ pub fn list_xkb_keyboards(self: *Self) !void {
     {
         var it = self.xkb_keyboards.safeIterator(.forward);
         while (it.next()) |xkb_keyboard| {
+            const device_name = if (xkb_keyboard.input_device) |input_device| input_device.name else null;
+            if (pattern) |p| {
+                if (!p.is_match(device_name)) continue;
+            }
+
             try stdout.writeAll("==============================================\n");
             try stdout.print(
                 "name: {s}\n",
-                .{
-                    (if (xkb_keyboard.input_device) |input_device| input_device.name else null)
-                    orelse "unknown",
-                }
+                .{ device_name orelse "unknown" }
             );
             try stdout.print("numlock: {s}\n", .{ @tagName(xkb_keyboard.numlock) });
             try stdout.print("capslock: {s}\n", .{ @tagName(xkb_keyboard.capslock) });

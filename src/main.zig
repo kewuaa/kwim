@@ -55,7 +55,7 @@ pub fn main() !void {
         }
     };
     defer switch (option) {
-        .list => {},
+        .list => |list_option| if (list_option.pattern) |p| allocator.free(p.str),
         .apply => |config| Config.free(allocator, config),
     };
 

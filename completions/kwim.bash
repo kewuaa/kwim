@@ -105,7 +105,7 @@ _kwim() {
                     if [[ ${#words[@]} -eq 3 ]]; then
                         COMPREPLY=( $(compgen -W "$devices" -- "$cur") )
                     else
-                        COMPREPLY=( $(compgen -W "-h --help" -- "$cur") )
+                        COMPREPLY=( $(compgen -W "$common_options" -- "$cur") )
                     fi
                     return 0
                     ;;
@@ -136,6 +136,13 @@ _kwim() {
                         ;;
                     xkb-keyboard)
                         COMPREPLY=( $(compgen -W "$common_options $xkb_options" -- "$cur") )
+                        ;;
+                esac
+                ;;
+            list)
+                case "${words[2]}" in
+                    input-device|libinput-device|xkb-keyboard)
+                        COMPREPLY=( $(compgen -W "$common_options" -- "$cur") )
                         ;;
                 esac
                 ;;

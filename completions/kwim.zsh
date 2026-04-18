@@ -130,6 +130,13 @@ _kwim() {
                         ;;
                 esac
                 ;;
+            list)
+                case $device_type in
+                    input-device|libinput-device|xkb-keyboard)
+                        compadd -a common_options
+                        ;;
+                esac
+                ;;
         esac
     fi
 }

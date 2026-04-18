@@ -7,6 +7,7 @@ const zon = std.zon;
 const log = std.log.scoped(.config);
 
 const rule = @import("config/rule.zig");
+pub const Pattern = @import("config/rule/pattern.zig");
 
 pub const InputDeviceRule = rule.InputDeviceRule;
 pub const LibinputDeviceRule = rule.LibinputDeviceRule;
