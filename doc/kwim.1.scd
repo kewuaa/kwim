@@ -7,8 +7,7 @@ kwim - kwm input manager for River Wayland compositor
 # SYNOPSIS
 
 *kwim* [OPTION]++
-*kwim* *list* _DEVICE\_TYPE_++
-*kwim* *apply* _DEVICE\_TYPE_ _DEVICE\_OPTION_... [ARG]...
+*kwim* *SUBCOMMAND* _DEVICE\_TYPE_ _DEVICE\_OPTION_... [ARG]...
 
 # DESCRIPTION
 
@@ -38,10 +37,10 @@ configuration file used by _kwm_.
 
 # SUBCOMMANDS
 
-*list* _DEVICE\_TYPE_
+*list*
 	Lists all connected devices of the specified type.
 
-*apply* _DEVICE\_TYPE_ _DEVICE\_OPTION_... [ARG]...
+*apply*
 	Applies configuration rules to a specific device type.
 
 # DEVICE\_TYPE
