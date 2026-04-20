@@ -540,7 +540,7 @@ fn parse_xkb_keyboard(allocator: mem.Allocator, it: *process.ArgIterator) !Confi
     if (res.args.layout) |layout| {
         rule.layout = blk: {
             const index = fmt.parseInt(u32, layout, 0) catch
-                break :blk .{ .name = try allocator.dupe(u8, layout) };
+                break :blk .{ .name = try allocator.dupeZ(u8, layout) };
             break :blk .{ .index = index };
         };
     }

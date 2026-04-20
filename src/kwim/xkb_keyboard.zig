@@ -29,7 +29,7 @@ pub const CapslockState = enum {
 };
 pub const Layout = union(enum) {
     index: u32,
-    name: []const u8,
+    name: [:0]const u8,
 };
 pub const Keymap = union(enum) {
     file: struct {
@@ -167,12 +167,7 @@ fn set_layout(self: *Self, layout: Layout) void {
         .name => |name| {
             log.info("<{*}> set keyboard layout to {s}", .{ self, name });
 
-            const n = utils.allocator.dupeZ(u8, name) catch |err| {
-                log.err("<{*}> dupeZ failed while set layout by name: {}", .{ self, err });
-                return;
-            };
-            defer utils.allocator.free(n);
-            self.rwm_xkb_keyboard.setLayoutByName(n);
+            self.rwm_xkb_keyboard.setLayoutByName(name);
         }
     }
 }
