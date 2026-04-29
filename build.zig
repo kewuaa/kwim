@@ -63,6 +63,7 @@ pub fn build(b: *std.Build) void {
         }
     };
 
+    const pie = b.option(bool, "pie", "if to enable pie") orelse false;
     const config = b.option([]const u8, "config", "config path");
     const kwm_config = b.option([]const u8, "kwm-config", "kwm config path");
     const bash_completion = b.option(bool, "bash-completion", "Set to true to install bash completion for kwim. Defaults to true.") orelse true;
@@ -176,6 +177,7 @@ pub fn build(b: *std.Build) void {
             .link_libc = true,
         }),
     });
+    exe.pie = pie;
     exe.root_module.linkSystemLibrary("wayland-client", .{});
     exe.root_module.linkSystemLibrary("xkbcommon", .{});
 
