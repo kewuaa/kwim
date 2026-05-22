@@ -12,7 +12,7 @@ const wl = wayland.client.wl;
 const river = wayland.client.river;
 
 const kwim = @import("kwim");
-const Config = @import("config");
+const config = @import("config");
 
 const flags = @import("flags.zig");
 
@@ -34,12 +34,12 @@ pub fn main(init: process.Init) !void {
                     fmt.bufPrint(&path_buffer, "{s}/.config/kwim/config.zon", .{ home })
                 else return error.GetConfigHomeFailed
             );
-            break :blk try Config.load(.{ .gpa = init.gpa, .io = init.io }, config_path);
+            break :blk try config.load(.{ .gpa = init.gpa, .io = init.io }, config_path);
         }
     };
     defer switch (option) {
         .list => |list_option| if (list_option.pattern) |p| init.gpa.free(p.str),
-        .apply => |config| Config.free(init.gpa, config),
+        .apply => |cfg| config.free(init.gpa, cfg),
     };
 
     const display = try wl.Display.connect(null);
