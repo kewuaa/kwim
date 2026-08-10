@@ -408,6 +408,8 @@ fn rwm_xkb_config_listener(rwm_xkb_config: *river.XkbConfigV1, event: river.XkbC
 
     switch (event) {
         .xkb_keyboard => |data| {
+            log.debug("new xkb_keyboard {*}", .{ data.id });
+
             const xkb_keyboard = XkbKeyboard.create(data.id) catch |err| {
                 log.err("create xkb_keyboard failed: {}", .{ err });
                 return;
