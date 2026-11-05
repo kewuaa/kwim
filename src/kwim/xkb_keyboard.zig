@@ -205,11 +205,11 @@ fn set_keymap(self: *Self, keymap: *const Keymap) !void {
             defer arena_allocator.deinit();
             const arena = arena_allocator.allocator();
 
-            const xkb_keymap_rules = if (map.rules) |rules| try arena.dupeZ(u8, rules) else null;
-            const xkb_keymap_model = if (map.model) |model| try arena.dupeZ(u8, model) else null;
-            const xkb_keymap_layout = if (map.layout) |layout| try arena.dupeZ(u8, layout) else null;
-            const xkb_keymap_variant = if (map.variant) |variant| try arena.dupeZ(u8, variant) else null;
-            const xkb_keymap_options = if (map.options) |options| try arena.dupeZ(u8, options) else null;
+            const xkb_keymap_rules = if (map.rules) |rules| try arena.dupeSentinel(u8, rules, 0) else null;
+            const xkb_keymap_model = if (map.model) |model| try arena.dupeSentinel(u8, model, 0) else null;
+            const xkb_keymap_layout = if (map.layout) |layout| try arena.dupeSentinel(u8, layout, 0) else null;
+            const xkb_keymap_variant = if (map.variant) |variant| try arena.dupeSentinel(u8, variant, 0) else null;
+            const xkb_keymap_options = if (map.options) |options| try arena.dupeSentinel(u8, options, 0) else null;
 
             const xkb_rule_names = xkbcommon.RuleNames {
                 .rules = if (xkb_keymap_rules) |rules| rules.ptr else null,

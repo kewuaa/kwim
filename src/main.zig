@@ -24,7 +24,10 @@ const Globals = struct {
 
 
 pub fn main(init: process.Init) !void {
-    const option = try flags.parse(.{ .gpa = init.gpa, .io = init.io }, init.minimal.args) orelse kwim.RunOption {
+    var arena_allocator = std.heap.ArenaAllocator.init(init.gpa);
+    defer arena_allocator.deinit();
+    const arena = arena_allocator.allocator();
+    const option = try flags.parse(.{ .gpa = init.gpa, .arena = arena, .io = init.io }, init.minimal.args) orelse kwim.RunOption {
         .apply = blk: {
             var path_buffer: [256]u8 = undefined;
             const config_path = try (
@@ -34,12 +37,12 @@ pub fn main(init: process.Init) !void {
                     fmt.bufPrint(&path_buffer, "{s}/.config/kwim/config.zon", .{ home })
                 else return error.GetConfigHomeFailed
             );
-            break :blk try config.load(.{ .gpa = init.gpa, .io = init.io }, config_path);
+            break :blk try config.load(.{ .gpa = init.gpa, .arena = arena, .io = init.io }, config_path);
         }
     };
     defer switch (option) {
         .list => |list_option| if (list_option.pattern) |p| init.gpa.free(p.str),
-        .apply => |cfg| config.free(init.gpa, cfg),
+        .apply => {},   // arena deinit above
     };
 
     const display = try wl.Display.connect(null);
