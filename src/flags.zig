@@ -64,6 +64,7 @@ const subcommand_params = clap.parseParamsComptime(
 pub fn parse(
     ctx: struct {
         gpa: mem.Allocator,
+        arena: mem.Allocator,
         io: Io,
     },
     args: process.Args
@@ -108,7 +109,7 @@ pub fn parse(
                 .apply => .{ .apply = try parse_apply(.{ .gpa = ctx.gpa, .io = ctx.io }, &it) },
             }
         else if (res.args.config) |config_path|
-            .{ .apply = try config.load(.{ .gpa = ctx.gpa, .io = ctx.io }, config_path) }
+            .{ .apply = try config.load(.{ .gpa = ctx.gpa, .arena = ctx.arena, .io = ctx.io }, config_path) }
         else null;
 }
 
@@ -539,8 +540,8 @@ fn parse_xkb_keyboard(
                     ctx.gpa.free(file.path);
                 },
                 .options => |map| {
-                    inline for (@typeInfo(@TypeOf(map)).@"struct".fields) |field_info| {
-                        if (@field(map, field_info.name)) |ptr| ctx.gpa.free(ptr);
+                    inline for (@typeInfo(@TypeOf(map)).@"struct".field_names) |field_name| {
+                        if (@field(map, field_name)) |ptr| ctx.gpa.free(ptr);
                     }
                 }
             }
@@ -570,7 +571,7 @@ fn parse_xkb_keyboard(
     if (res.args.layout) |layout| {
         rule.layout = blk: {
             const index = fmt.parseInt(u32, layout, 0) catch
-                break :blk .{ .name = try ctx.gpa.dupeZ(u8, layout) };
+                break :blk .{ .name = try ctx.gpa.dupeSentinel(u8, layout, 0) };
             break :blk .{ .index = index };
         };
     }
@@ -586,10 +587,10 @@ fn parse_xkb_keyboard(
     }
 
     if (rule.keymap == null) {
-        inline for (@typeInfo(@TypeOf(rule.keymap.?.options)).@"struct".fields) |field| {
+        inline for (@typeInfo(@TypeOf(rule.keymap.?.options)).@"struct".field_names) |field_name| {
             if (rule.keymap == null) rule.keymap = .{ .options = .{} };
-            if (@field(res.args, "keymap-"++field.name)) |str| {
-                @field(rule.keymap.?.options, field.name) = try ctx.gpa.dupe(u8, str);
+            if (@field(res.args, "keymap-" ++ field_name)) |str| {
+                @field(rule.keymap.?.options, field_name) = try ctx.gpa.dupe(u8, str);
             }
         }
     }
@@ -599,8 +600,8 @@ fn parse_xkb_keyboard(
 
 
 fn all_null(object: anytype) bool {
-    inline for (@typeInfo(@TypeOf(object)).@"struct".fields) |field_info| {
-        if (@field(object, field_info.name) != null) return false;
+    inline for (@typeInfo(@TypeOf(object)).@"struct".field_names) |field_name| {
+        if (@field(object, field_name) != null) return false;
     }
     return true;
 }

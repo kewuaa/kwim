@@ -23,6 +23,7 @@ pub const Config = struct {
 
 pub fn load(ctx: struct {
     gpa: mem.Allocator,
+    arena: mem.Allocator,
     io: Io,
 }, path: []const u8) !Config {
     log.info("loading configuraton from `{s}`", .{ path });
@@ -44,16 +45,18 @@ pub fn load(ctx: struct {
     const reader = &file_reader.interface;
     try reader.readSliceAll(buffer[0..size]);
 
-    return try zon.parse.fromSliceAlloc(
+    var diagnostics: zon.parse.Diagnostics = undefined;
+    return zon.parse.fromSlice(
         Config,
-        ctx.gpa,
-        buffer[0..size:0],
-        null,
-        .{ .ignore_unknown_fields = true },
-    );
-}
-
-
-pub inline fn free(gpa: mem.Allocator, config: Config) void {
-    zon.parse.free(gpa, config);
+        .{
+            .gpa = ctx.gpa,
+            .arena = ctx.gpa,
+            .diagnostics = &diagnostics,
+            .source = buffer[0..size :0],
+            .ignore_unknown_fields = true,
+        },
+    ) catch |err| {
+        log.err("Failed to parse: {f}", .{diagnostics.fmt(path)});
+        return err;
+    };
 }
